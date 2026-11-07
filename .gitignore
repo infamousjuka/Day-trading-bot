@@ -1,0 +1,27 @@
+# Geheimnisse – niemals einchecken!
+.env
+*.env
+!.env.example
+
+# Laufzeitdaten des Bots
+data/state/
+data/history/
+logs/
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Editor / Betriebssystem
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

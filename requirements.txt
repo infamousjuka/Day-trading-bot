@@ -1,0 +1,12 @@
+# Installation: pip install -r requirements.txt
+# Getestet mit Python 3.13, python-telegram-bot 22.8, yfinance 1.8.0, pandas 3.1 und 2.2.
+python-telegram-bot[job-queue]>=22.0,<23
+yfinance>=0.2.54
+pandas>=2.1
+numpy>=1.26
+PyYAML>=6.0
+python-dotenv>=1.0
+tzdata>=2024.1
+pytest>=8
+# Das Projekt selbst (macht "python -m daytrading_bot" verfuegbar)
+-e .

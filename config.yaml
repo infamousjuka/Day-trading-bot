@@ -1,0 +1,110 @@
+# Konfiguration des Daytrading-Signal-Bots
+# -----------------------------------------------------------------------------
+# Hier stehen KEINE Geheimnisse. Bot-Token und Chat-ID gehören in die .env-Datei
+# (siehe .env.example). Uhrzeiten bitte immer in Anführungszeichen schreiben.
+
+# Werte, die beobachtet werden. Symbole im Yahoo-Finance-Format, ".DE" = Xetra.
+watchlist:
+  - symbol: SAP.DE
+    name: SAP
+  - symbol: SIE.DE
+    name: Siemens
+  - symbol: ALV.DE
+    name: Allianz
+  - symbol: DTE.DE
+    name: Deutsche Telekom
+  - symbol: RHM.DE
+    name: Rheinmetall
+
+schedule:
+  # Raster: Kerzengröße UND Prüfintervall in Minuten (1, 2, 5, 15, 30 oder 60).
+  interval_minutes: 5
+  # Nach Ende einer Kerze so lange warten, bis der Datenanbieter sie fertig hat.
+  # Bei 20 Sekunden wird um 10:05:20, 10:10:20, ... geprüft.
+  delay_seconds: 20
+  # Tagesbilanz 15 Minuten nach Handelsschluss schicken.
+  daily_summary: true
+
+data:
+  # yahoo = Live-Daten über yfinance (inoffiziell, evtl. verzögert)
+  # csv   = Kurse aus CSV-Dateien in csv_dir (zum Testen)
+  source: yahoo
+  # Wie viele Kalendertage Historie pro Abfrage geladen werden (für die Indikatoren).
+  history_days: 5
+  # Sind die neuesten Daten älter als das, gibt es keine Kauf-Signale
+  # (Verkaufs-Signale kommen trotzdem, mit Hinweis auf die Verzögerung).
+  max_delay_minutes: 20
+  # Abgeschlossene Kerzen mitschreiben -> eigener Datensatz für Backtests
+  # (Yahoo liefert 5-Minuten-Kerzen nur für ca. 60 Tage rückwirkend).
+  record_bars: true
+  csv_dir: data/history
+
+market:
+  # Xetra-Handelszeiten. Die Signale basieren auf Xetra-Kursen.
+  timezone: Europe/Berlin
+  open: "09:00"
+  close: "17:30"
+  # Die erste Viertelstunde ist oft sehr unruhig -> noch keine Käufe.
+  first_entry: "09:15"
+  # Danach keine neuen Käufe mehr.
+  last_entry: "17:00"
+  # Daytrading: ab dieser Uhrzeit Verkaufs-Signal für alle offenen Positionen.
+  # Auf null setzen, um Positionen über Nacht zu halten.
+  flat_at: "17:20"
+  # Zusätzliche handelsfreie Tage. Neujahr, Karfreitag, Ostermontag, 1. Mai,
+  # 24.–26.12. und Silvester sind schon eingebaut. Format: 2026-12-24
+  extra_holidays: []
+
+strategy:
+  # Kauf: schneller EMA kreuzt langsamen EMA nach oben, RSI im Korridor,
+  # Kurs über dem Tages-VWAP. Details: docs/STRATEGIE.md
+  ema_fast: 9
+  ema_slow: 21
+  rsi_period: 14
+  rsi_min: 50
+  rsi_max: 70
+  atr_period: 14
+  use_vwap_filter: true
+  # Verkauf auch, wenn der schnelle EMA wieder unter den langsamen fällt.
+  exit_on_cross_down: true
+
+risk:
+  # Kapital, das für Daytrading reserviert ist (nicht die Altersvorsorge!).
+  capital: 10000
+  # Maximaler Verlust pro Trade in EUR inkl. Kosten (bestimmt die Stückzahl).
+  risk_per_trade: 50
+  # Maximaler Positionswert pro Trade in EUR.
+  max_position_value: 2500
+  # Stop-Loss und Kursziel als Vielfaches der ATR (durchschnittliche Kerzenspanne).
+  stop_loss_atr: 2.0
+  take_profit_atr: 4.0
+  max_open_positions: 3
+  # Ab diesem realisierten Tagesverlust in EUR keine neuen Kauf-Signale mehr.
+  max_daily_loss: 150
+  # Trade Republic: normale Orders nur in ganzen Stück.
+  whole_shares: true
+  # Die mögliche Chance muss mindestens so viel mal größer sein als die Kosten.
+  min_reward_cost_ratio: 3.0
+  # Limit-Vorschlag beim Kauf: Signalkurs plus diesen Aufschlag in Prozent.
+  limit_buffer_pct: 0.10
+
+costs:
+  # Trade Republic seit dem PFOF-Verbot (1.7.2026) laut Medienbericht:
+  # 1 EUR bei Bestpreis-Ausführung, 2 EUR bei eigener Handelsplatzwahl.
+  fee_per_order: 1.00
+  # Angenommene Geld-Brief-Spanne in Prozent (Kauf und Verkauf zahlen je die Hälfte).
+  spread_pct: 0.05
+  # Zusätzlicher Preisnachteil pro Order in Prozent (manuelle Ausführung).
+  slippage_pct: 0.02
+
+telegram:
+  # Beim Start eine Nachricht schicken.
+  startup_message: true
+  # Knöpfe "Gekauft" / "Nicht gekauft" unter Kauf-Signalen.
+  buttons: true
+
+files:
+  state: data/state/state.json
+  journal: data/state/journal.csv
+  log: logs/bot.log
+  reports: reports
